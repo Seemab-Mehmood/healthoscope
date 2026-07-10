@@ -1,0 +1,42 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html, body, #root {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
+/* Dark theme (default): rooted in the PHP logo's forest green, not navy-black. */
+:root,
+[data-theme="dark"] {
+  --ink-950: 8 18 13;
+  --ink-900: 15 30 21;
+  --ink-800: 24 46 33;
+  --ink-700: 34 64 46;
+  --ink-600: 55 90 68;
+  --ink-500: 110 145 122;
+  --ink-400: 145 175 155;
+  --ink-300: 175 197 182;
+  --ink-200: 205 220 210;
+  --ink-100: 230 240 233;
+  --ink-50: 244 249 245;
+}
+
+/* Light theme: same semantic scale, inverted so bg-ink-950 (used for surfaces)
+   resolves light, and text-ink-100/200/300 (used for text) resolves dark. */
+[data-theme="light"] {
+  --ink-950: 246 250 247;
+  --ink-900: 255 255 255;
+  --ink-800: 214 228 219;
+  --ink-700: 195 213 202;
+  --ink-600: 165 188 175;
+  --ink-500: 90 115 100;
+  --ink-400: 60 85 70;
+  --ink-300: 40 60 48;
+  --ink-200: 25 42 32;
+  --ink-100: 12 26 18;
+  --ink-50: 6 15 10;
+}
+
