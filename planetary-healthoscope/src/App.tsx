@@ -1,6 +1,9 @@
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import { WHO_COUNTRIES, WHO_REGION_ORDER, WHO_REGION_LABELS } from "./data/whoCountries";
 import { useLiveEnvironmentalData } from "./hooks/useLiveEnvironmentalData";
+import AboutUsPage from "./components/AboutUsPage";
+import HowWeWorkPage from "./components/HowWeWorkPage";
+import ActionInsightsPanel from "./components/ActionInsightsPanel";
 
 const FONT_LINK_ID = "healthoscope-fonts";
 
@@ -653,6 +656,8 @@ function CountrySelector({ selectedCountry, onSelect }) {
 export default function App() {
   useFonts();
 
+  const [page, setPage] = useState("dashboard"); // 'dashboard' | 'about' | 'how'
+
   const [theme, setTheme] = useState(() => {
     try {
       return window.localStorage.getItem("healthoscope-theme") || "dark";
@@ -725,6 +730,9 @@ export default function App() {
       biodiversityIndex: hasEco ? (1.0 - (activeDeforest * 0.0085)).toFixed(2) : null,
       waterStressScore: clamp(0, 100, Math.round((activeTemp * 2.3) + ((activeDeforest ?? 30) * 0.45))),
       hasEco,
+      tScore,
+      pmScore,
+      dScore,
     };
   }, [activeTemp, activePm25, activeDeforest, hasCoreData]);
 
@@ -735,46 +743,76 @@ export default function App() {
 
       {/* Dynamic Header */}
       <header className="border-b border-ink-900 bg-ink-900/40 backdrop-blur-xl px-6 py-4 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-          <div className="flex items-center gap-4">
-            <PHPLogo size={46} />
-            <div>
-              <h1 className="font-mono font-extrabold text-lg tracking-wider text-ink-100 flex items-center gap-2">
-                PLANETARY HEALTHOSCOPE <span className="text-[10px] bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded border border-emerald-500/20 font-mono">v4.0</span>
-              </h1>
-              <p className="font-mono text-[9px] tracking-widest text-ink-400 uppercase">
-                THE STETHOSCOPE FOR EARTH · POWERED BY PLANETARY HEALTH PAKISTAN (PHP)
-              </p>
+        <div className="max-w-7xl mx-auto flex flex-col gap-4">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div className="flex items-center gap-4">
+              <PHPLogo size={46} />
+              <div>
+                <h1 className="font-mono font-extrabold text-lg tracking-wider text-ink-100 flex items-center gap-2">
+                  PLANETARY HEALTHOSCOPE <span className="text-[10px] bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded border border-emerald-500/20 font-mono">v4.0</span>
+                </h1>
+                <p className="font-mono text-[9px] tracking-widest text-ink-400 uppercase">
+                  THE STETHOSCOPE FOR EARTH · POWERED BY PLANETARY HEALTH PAKISTAN (PHP)
+                </p>
+              </div>
+            </div>
+            <div className="flex flex-wrap items-center gap-x-6 gap-y-2 font-mono text-[11px] text-ink-400">
+              {page === "dashboard" && (
+                <>
+                  <div>MONITOR ZONE: <span className="text-ink-100 font-semibold">{selectedCountry.name.toUpperCase()}</span></div>
+                  <div>LOCAL CLOCK: <span className="text-blue-400">{clock.toLocaleTimeString("en-GB")}</span></div>
+                  {mode === "live" ? (
+                    liveData.loading ? (
+                      <div className="flex items-center gap-2 text-blue-400 font-medium">
+                        <span className="w-2 h-2 rounded-full bg-blue-400 animate-pulse" /> FETCHING LIVE DATA...
+                      </div>
+                    ) : liveData.error && activeTemp === null && activePm25 === null ? (
+                      <div className="flex items-center gap-2 text-rose-400 font-medium">
+                        <span className="w-2 h-2 rounded-full bg-rose-400" /> LIVE FEED UNAVAILABLE
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-2 text-emerald-400 font-medium">
+                        <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_#10b981]" /> LIVE DATA CONNECTED
+                      </div>
+                    )
+                  ) : (
+                    <div className="flex items-center gap-2 text-amber-400 font-medium">
+                      <span className="w-2 h-2 rounded-full bg-amber-400" /> SCENARIO SIMULATOR (NOT LIVE)
+                    </div>
+                  )}
+                </>
+              )}
+              <ThemeToggle theme={theme} onToggle={() => setTheme(t => (t === "dark" ? "light" : "dark"))} />
             </div>
           </div>
-          <div className="flex flex-wrap items-center gap-x-6 gap-y-2 font-mono text-[11px] text-ink-400">
-            <div>MONITOR ZONE: <span className="text-ink-100 font-semibold">{selectedCountry.name.toUpperCase()}</span></div>
-            <div>LOCAL CLOCK: <span className="text-blue-400">{clock.toLocaleTimeString("en-GB")}</span></div>
-            {mode === "live" ? (
-              liveData.loading ? (
-                <div className="flex items-center gap-2 text-blue-400 font-medium">
-                  <span className="w-2 h-2 rounded-full bg-blue-400 animate-pulse" /> FETCHING LIVE DATA...
-                </div>
-              ) : liveData.error && activeTemp === null && activePm25 === null ? (
-                <div className="flex items-center gap-2 text-rose-400 font-medium">
-                  <span className="w-2 h-2 rounded-full bg-rose-400" /> LIVE FEED UNAVAILABLE
-                </div>
-              ) : (
-                <div className="flex items-center gap-2 text-emerald-400 font-medium">
-                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_#10b981]" /> LIVE DATA CONNECTED
-                </div>
-              )
-            ) : (
-              <div className="flex items-center gap-2 text-amber-400 font-medium">
-                <span className="w-2 h-2 rounded-full bg-amber-400" /> SCENARIO SIMULATOR (NOT LIVE)
-              </div>
-            )}
-            <ThemeToggle theme={theme} onToggle={() => setTheme(t => (t === "dark" ? "light" : "dark"))} />
-          </div>
+
+          <nav className="flex gap-2 font-mono text-[10px]">
+            {[
+              { id: "dashboard", label: "Dashboard" },
+              { id: "about", label: "About Us" },
+              { id: "how", label: "How We Work" },
+            ].map(tab => (
+              <button
+                key={tab.id}
+                onClick={() => setPage(tab.id)}
+                className={`px-3 py-1.5 rounded uppercase border tracking-wider transition-all font-bold ${
+                  page === tab.id
+                    ? "border-emerald-500 bg-emerald-500/10 text-emerald-400"
+                    : "border-ink-800 text-ink-500 hover:text-ink-300"
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </nav>
         </div>
       </header>
 
+      {page === "about" && <AboutUsPage />}
+      {page === "how" && <HowWeWorkPage />}
+
       {/* Main Container */}
+      {page === "dashboard" && (
       <main className="max-w-7xl mx-auto px-6 py-6 flex flex-col gap-6">
 
         {/* Top Scope Area */}
@@ -1130,6 +1168,17 @@ export default function App() {
                     )}
                   </div>
                 </div>
+
+                <ActionInsightsPanel
+                  countryName={selectedCountry.name}
+                  temp={activeTemp}
+                  pm25={activePm25}
+                  deforest={displayDeforest}
+                  tScore={computedMetrics.tScore}
+                  pmScore={computedMetrics.pmScore}
+                  dScore={computedMetrics.dScore}
+                  hasEco={computedMetrics.hasEco}
+                />
               </>
             ) : (
               <div className="bg-ink-900/40 border border-ink-900 rounded-lg p-10 flex flex-col items-center justify-center text-center gap-3 min-h-[300px]">
@@ -1159,6 +1208,7 @@ export default function App() {
         </footer>
 
       </main>
+      )}
 
       <style>{`
         @keyframes radarSweep {
